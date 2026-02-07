@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'providers/persona_provider.dart';
+import 'screens/persona_screen.dart';
 import 'design_system.dart';
 import 'firebase_options.dart';
 import 'services/theme_provider.dart';
@@ -21,8 +23,11 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final themeProvider = await ThemeProvider.init();
   runApp(
-    ChangeNotifierProvider.value(
-      value: themeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: themeProvider),
+        ChangeNotifierProvider(create: (_) => PersonaProvider()),
+      ],
       child: const ChatApp(),
     ),
   );
@@ -268,13 +273,13 @@ final GoRouter _router = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/chat',
+      path: '/personas',
       pageBuilder: (context, state) => CustomTransitionPage(
         key: state.pageKey,
-        child: ChatScreen(expert: state.extra as Expert),
+        child: const PersonaScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           final slide = Tween<Offset>(
-            begin: const Offset(0.1, 0),
+            begin: const Offset(0.05, 0),
             end: Offset.zero,
           ).animate(animation);
           return FadeTransition(
@@ -283,6 +288,39 @@ final GoRouter _router = GoRouter(
           );
         },
       ),
+    ),
+    GoRoute(
+      path: '/chat',
+      pageBuilder: (context, state) {
+        final extra = state.extra;
+        Expert expert;
+        String? systemPrompt;
+        if (extra is Expert) {
+          expert = extra;
+          systemPrompt = null;
+        } else if (extra is Map) {
+          expert = extra['expert'] as Expert;
+          systemPrompt = extra['systemPrompt'] as String?;
+        } else {
+          // fallback
+          expert = const Expert(name: 'Assistant', icon: Icons.person);
+        }
+
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: ChatScreen(expert: expert, systemPrompt: systemPrompt),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final slide = Tween<Offset>(
+              begin: const Offset(0.1, 0),
+              end: Offset.zero,
+            ).animate(animation);
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(position: slide, child: child),
+            );
+          },
+        );
+      },
     ),
   ],
 );

@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Voice Input and TTS permissions -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access to record your voice messages for the chat.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app needs speech recognition to convert your voice to text in the chat.</string>
+	<!-- For Text-to-Speech output (usually built-in on iOS, but good to declare) -->
 </dict>
 </plist>

@@ -396,8 +396,9 @@ BEFORE any response:
 
   static Future<String> sendMultiTurnMessage(
     List<ChatMessage> conversationHistory,
-    Expert expert,
-  ) async {
+    Expert expert, {
+    String? systemPrompt,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('$apiUrl?key=$apiKey'),
@@ -406,7 +407,7 @@ BEFORE any response:
           'contents': _formatMessages(conversationHistory),
           'system_instruction': {
             'parts': [
-              {'text': getSystemPrompt(expert)},
+              {'text': systemPrompt ?? getSystemPrompt(expert)},
             ],
           },
           'generationConfig': {

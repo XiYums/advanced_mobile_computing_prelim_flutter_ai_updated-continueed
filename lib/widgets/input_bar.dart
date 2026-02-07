@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../design_system.dart';
 import '../services/storage_service.dart';
+import '../services/voice_service.dart';
 
 typedef SendMessageCallback = Future<void> Function(String text, {String? imageUrl});
 
@@ -21,6 +22,18 @@ class InputBar extends StatefulWidget {
 class _InputBarState extends State<InputBar> {
   final TextEditingController _textEditingController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final VoiceService _voiceService = VoiceService();
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVoice();
+  }
+
+  Future<void> _initializeVoice() async {
+    await _voiceService.initializeSpeechRecognition();
+  }
 
   @override
   void dispose() {
@@ -52,6 +65,31 @@ class _InputBarState extends State<InputBar> {
     }
   }
 
+  Future<void> _handleVoiceInput() async {
+    try {
+      if (!_isListening) {
+        await _voiceService.startListening();
+        setState(() => _isListening = true);
+        HapticFeedback.selectionClick();
+      } else {
+        await _voiceService.stopListening();
+        setState(() => _isListening = false);
+        HapticFeedback.selectionClick();
+
+        // Send recognized text as message
+        final recognizedText = _voiceService.recognizedText.trim();
+        if (recognizedText.isNotEmpty) {
+          _textEditingController.text = recognizedText;
+          _sendMessage();
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Voice error: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -61,6 +99,16 @@ class _InputBarState extends State<InputBar> {
           child: IconButton(
             onPressed: _pickAndSendImage,
             icon: const Icon(Icons.image, color: AppColors.primary),
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(right: AppSpacing.small),
+          child: IconButton(
+            onPressed: _handleVoiceInput,
+            icon: Icon(
+              _isListening ? Icons.mic : Icons.mic_none,
+              color: _isListening ? AppColors.error : AppColors.primary,
+            ),
           ),
         ),
         Expanded(

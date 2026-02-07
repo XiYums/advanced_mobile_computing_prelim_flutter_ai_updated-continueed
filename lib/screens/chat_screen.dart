@@ -10,8 +10,9 @@ import '../services/gemini_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final Expert expert;
+  final String? systemPrompt;
 
-  const ChatScreen({super.key, required this.expert});
+  const ChatScreen({super.key, required this.expert, this.systemPrompt});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -86,6 +87,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final aiResponse = await GeminiService.sendMultiTurnMessage(
         messages, // ← Entire conversation!
         widget.expert,
+        systemPrompt: widget.systemPrompt,
       );
 
       // Add AI response

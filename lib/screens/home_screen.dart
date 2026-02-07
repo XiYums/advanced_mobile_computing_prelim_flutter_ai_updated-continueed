@@ -15,6 +15,7 @@ class HomeScreen extends StatelessWidget {
     Expert(name: 'Musician', icon: Icons.music_note),
     Expert(name: 'Fitness Instructor', icon: Icons.fitness_center),
     Expert(name: 'Content Creator', icon: Icons.create),
+    Expert(name: 'Add Persona', icon: Icons.person_add),
   ];
 
   @override
@@ -53,6 +54,47 @@ class HomeScreen extends StatelessWidget {
                   itemCount: experts.length,
                   itemBuilder: (context, index) {
                     final expert = experts[index];
+                    // Special tile for creating/ managing personas
+                    if (expert.name == 'Add Persona') {
+                      return GestureDetector(
+                        onTap: () => context.push('/personas'),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(AppRadius.large),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.03),
+                                spreadRadius: 1,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(AppSpacing.card),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.person_add, size: 36, color: AppColors.primary),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Add Persona',
+                                style: AppTextStyles.h3,
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
                     return ExpertCard(
                       expert: expert,
                       onTap: () {
